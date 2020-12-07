@@ -16,15 +16,24 @@ fn main() {
     let mut found = false;
 
     let mut i = 0;
-    while i < numbers.len() - 1 {
+    while i < numbers.len() - 2 {
         let mut j = i + 1;
-        while j < numbers.len() {
-            if numbers[i] + numbers[j] == 2020{
-                println!("Found numbers: {} and {}. Product: {}", numbers[i], numbers[j], numbers[i] * numbers[j]);
-                found = true;
-                break;
+        while j < numbers.len() - 1 {
+            let mut k = j + 1;
+            while k < numbers.len() {
+                if numbers[i] + numbers[j] + numbers[k] == 2020{
+                    println!("Found numbers: {}, {} and {}. Product: {}",
+                             numbers[i], numbers[j], numbers[k],
+                             numbers[i] * numbers[j] * numbers[k]);
+                    found = true;
+                    break;
+                }
+                k = k + 1;
             }
             j = j + 1;
+            if found{
+                break;
+            }
         }
 
         i = i + 1;
