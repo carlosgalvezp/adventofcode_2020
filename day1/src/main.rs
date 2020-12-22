@@ -21,23 +21,27 @@ fn main() {
         while j < numbers.len() - 1 {
             let mut k = j + 1;
             while k < numbers.len() {
-                if numbers[i] + numbers[j] + numbers[k] == 2020{
-                    println!("Found numbers: {}, {} and {}. Product: {}",
-                             numbers[i], numbers[j], numbers[k],
-                             numbers[i] * numbers[j] * numbers[k]);
+                if numbers[i] + numbers[j] + numbers[k] == 2020 {
+                    println!(
+                        "Found numbers: {}, {} and {}. Product: {}",
+                        numbers[i],
+                        numbers[j],
+                        numbers[k],
+                        numbers[i] * numbers[j] * numbers[k]
+                    );
                     found = true;
                     break;
                 }
                 k = k + 1;
             }
             j = j + 1;
-            if found{
+            if found {
                 break;
             }
         }
 
         i = i + 1;
-        if found{
+        if found {
             break;
         }
     }
