@@ -1,10 +1,14 @@
 use std::env;
 use std::fs;
 
-fn day1(contents: String){
+struct Slope{
+    x: usize,
+    y: usize,
+}
+
+fn make_map(contents: String) -> Vec<Vec<char>>{
     let lines = contents.lines();
 
-    // Create map
     let mut map = Vec::new();
 
     for line in lines{
@@ -15,6 +19,11 @@ fn day1(contents: String){
         map.push(map_row);
     }
 
+    return map;
+}
+
+fn get_nr_trees(map: &Vec<Vec<char>>, slope: Slope) -> i32
+{
     let n_rows = map.len();
     let x_max = map[0].len();
 
@@ -27,15 +36,45 @@ fn day1(contents: String){
             n_trees += 1;
         }
 
-        x = (x + 3) % x_max;
-        y = y + 1;
+        x = (x + slope.x) % x_max;
+        y = y + slope.y;
     }
+
+    return n_trees;
+}
+
+fn day1(contents: String){
+
+    // Create map
+    let map = make_map(contents);
+
+    // Get trees
+    let slope = Slope{x:3, y:1};
+    let n_trees = get_nr_trees(&map, slope);
 
     println!("Found {} trees", n_trees);
 }
 
 fn day2(contents: String){
+    // Create map
+    let map = make_map(contents);
 
+    // Define slope combinations
+    let slopes = vec![
+        Slope{x: 1, y:1},
+        Slope{x: 3, y:1},
+        Slope{x: 5, y:1},
+        Slope{x: 7, y:1},
+        Slope{x: 1, y:2},
+    ];
+
+    // Get trees for combinations and multiply
+    let mut output: i64 = 1;
+    for slope in slopes{
+        output = output * (get_nr_trees(&map, slope) as i64);
+    }
+
+    println!("Output: {}", output);
 }
 
 fn main() {
