@@ -2,14 +2,19 @@ use std::env;
 use std::fs;
 use regex::Regex;
 
-struct BagInfo {
+struct BagQuantity{
     name: String,
-    bags: Vec<String>,
+    quantity: i32,
 }
 
-fn day1(contents: String) {
+struct BagInfo {
+    name: String,
+    bags: Vec<BagQuantity>,
+}
+
+fn parse_contents(contents: String) -> Vec<BagInfo>{
     let re_full = Regex::new(r"^([\w ]+) bags contain (.*)\.$").unwrap();
-    let re_contains = Regex::new(r"\d+ ([\w ]+) bag[s]?").unwrap();
+    let re_contains = Regex::new(r"(\d+) ([\w ]+) bag[s]?").unwrap();
 
     // Parse input into vector of BagInfo
     let mut bags = Vec::new();
@@ -21,18 +26,42 @@ fn day1(contents: String) {
             let bag_name = full_sentence_parse_data[1].to_owned();
             let bag_contents = full_sentence_parse_data[2].to_owned();
 
-            let mut contained_bags : Vec<String> = Vec::new();
+            let mut contained_bags : Vec<BagQuantity> = Vec::new();
 
             for bag_str in bag_contents.split(","){
-                let bag_name = re_contains.captures(&bag_str);
-                if bag_name.is_some(){
-                    contained_bags.push(bag_name.unwrap()[1].to_owned());
+                let bag_quantity = re_contains.captures(&bag_str);
+                if bag_quantity.is_some(){
+                    let bag_quantity_data = bag_quantity.unwrap();
+                    contained_bags.push(BagQuantity{name: bag_quantity_data[2].to_owned(),
+                                                    quantity: bag_quantity_data[1].parse::<i32>().unwrap()});
                 }
             }
 
             bags.push(BagInfo{name: bag_name, bags: contained_bags});
         }
     }
+
+    return bags;
+}
+
+fn get_nr_bags(bags: &Vec<BagInfo>, bag_name: &str) -> i32 {
+    let mut n_bags = 0;
+
+    for bag in bags{
+        if bag.name == bag_name{
+            for contained_bag in &bag.bags {
+                n_bags += contained_bag.quantity * (1 + get_nr_bags(bags, &contained_bag.name));
+            }
+
+            break;
+        }
+    }
+
+    return n_bags;
+}
+
+fn day1(contents: String) {
+    let bags = parse_contents(contents);
 
     // Search all bags that can contain (directly or transitively) a shiny gold bag
     // Use breadth-first search to do the search
@@ -50,7 +79,7 @@ fn day1(contents: String) {
         for bag in &bags {
             let bag_name = &bag.name;
             if !searched_bags.contains(bag_name) && !to_search_bags.contains(bag_name){
-                if bag.bags.contains(&bag_to_search){
+                if bag.bags.iter().any(|x| x.name == bag_to_search){
                     to_search_bags.push(bag_name.to_owned());
                 }
             }
@@ -61,7 +90,9 @@ fn day1(contents: String) {
 }
 
 fn day2(contents: String) {
-
+    let bags = parse_contents(contents);
+    let n_bags_shiny = get_nr_bags(&bags, "shiny gold");
+    println!("Number of bags inside shiny gold: {}", n_bags_shiny);
 }
 
 fn main() {
