@@ -15,6 +15,15 @@ fn manhattan_distance(a: &Position, b: &Position) -> i32{
     return (a.x - b.x).abs() + (a.y - b.y).abs();
 }
 
+fn rotate(v: &Position, theta: f32) -> Position {
+    let vx = v.x as f32;
+    let vy = v.y as f32;
+    let px = vx * theta.cos() - vy * theta.sin();
+    let py = vx * theta.sin() + vy * theta.cos();
+
+    return Position{x: px.round() as i32, y: py.round() as i32};
+}
+
 fn day1(contents: String){
     let origin = Position{x: 0, y: 0};
     let mut pose = Pose{position: origin, orientation: 0f32};
@@ -43,6 +52,35 @@ fn day1(contents: String){
 }
 
 fn day2(contents:String){
+    let origin = Position{x: 0, y: 0};
+    let mut ship_position = origin;
+    let mut waypoint_position = Position{x: 10, y: 1};
+
+    for line in contents.lines(){
+        let action = &line[0..1];
+        let value = line[1..].parse::<i32>().unwrap();
+
+        match action{
+            "E" => waypoint_position.x += value,
+            "W" => waypoint_position.x -= value,
+            "N" => waypoint_position.y += value,
+            "S" => waypoint_position.y -= value,
+            "L" => {
+                waypoint_position = rotate(&waypoint_position, (value as f32).to_radians());
+            },
+            "R" => {
+                waypoint_position = rotate(&waypoint_position, (-value as f32).to_radians());
+            }
+            "F" => {
+                ship_position.x += value * waypoint_position.x;
+                ship_position.y += value * waypoint_position.y;
+            },
+            _ => panic!("Wrong action {}", action),
+        };
+    }
+
+    let origin = Position{x: 0, y: 0};
+    println!("Ship manhattan distance: {}", manhattan_distance(&ship_position, &origin));
 
 }
 
