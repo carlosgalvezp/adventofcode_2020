@@ -1,18 +1,59 @@
 use std::env;
 use std::fs;
 
+#[derive(Clone, PartialEq)]
 enum Operation {
     Acc,
     Jmp,
     Nop,
 }
 
+#[derive(Clone)]
 struct CodeLine {
     operation: Operation,
     argument: i32,
 }
 
 type Code = Vec<CodeLine>;
+
+struct IntCode{
+    code: Code,
+    pc: i32,
+    acc: i32,
+    processed_lines: Vec<i32>,
+}
+
+impl IntCode{
+    fn new(code: Code) -> IntCode{
+        return IntCode{code, pc: 0, acc: 0, processed_lines: Vec::new()};
+    }
+
+    fn run(&mut self) -> bool{
+        while self.pc < (self.code.len() as i32) {
+            if self.processed_lines.contains(&self.pc){
+                return false;
+            }
+
+            self.processed_lines.push(self.pc);
+
+            let line = &self.code[self.pc as usize];
+            match line.operation {
+                Operation::Acc => {
+                    self.acc += line.argument;
+                    self.pc += 1;
+                },
+                Operation::Jmp => {
+                    self.pc += line.argument
+                },
+                Operation::Nop => {
+                    self.pc += 1;
+                },
+            };
+        }
+
+        return true;
+    }
+}
 
 fn get_code(contents: String) -> Code {
     let mut code = Code::new();
@@ -35,36 +76,36 @@ fn get_code(contents: String) -> Code {
 
 fn day1(contents: String) {
     let code = get_code(contents);
+    let mut intcode = IntCode::new(code);
 
-    let mut processed_lines = Vec::new();
-    let mut acc = 0;
-    let mut pc = 0;
+    intcode.run();
 
-    loop {
-        if processed_lines.contains(&pc){
-            break;
-        }
-        processed_lines.push(pc);
-        let line = &code[pc as usize];
-        match line.operation {
-            Operation::Acc => {
-                acc += line.argument;
-                pc += 1;
-            },
-            Operation::Jmp => {
-                pc += line.argument
-            },
-            Operation::Nop => {
-                pc += 1;
-            },
-        };
-    }
-
-    println!("Value of accumulator before loop: {}", acc);
+    println!("Value of accumulator before loop: {}", intcode.acc);
 }
 
 fn day2(contents: String) {
+    let original_code = get_code(contents);
 
+    for i in 0..original_code.len(){
+        let mut code = original_code.clone();
+
+        if code[i].operation == Operation::Nop{
+            code[i].operation = Operation::Jmp;
+        }
+        else if code[i].operation == Operation::Jmp{
+            code[i].operation = Operation::Nop;
+        }
+        else{
+            continue;
+        }
+
+        let mut intcode = IntCode::new(code);
+        let result = intcode.run();
+        if result{
+            println!("After fixing bug, acc contains {}", intcode.acc);
+            return;
+        }
+    }
 }
 
 fn main() {
