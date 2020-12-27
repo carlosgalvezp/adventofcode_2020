@@ -38,7 +38,7 @@ impl Map{
     }
 }
 
-fn get_nr_occupied_adjacent(map: &Map, x: i32, y: i32) -> i32 {
+fn get_nr_occupied_part1(map: &Map, x: i32, y: i32) -> i32 {
     let mut result = 0;
 
     let x_min = std::cmp::max(x - 1, 0);
@@ -58,7 +58,37 @@ fn get_nr_occupied_adjacent(map: &Map, x: i32, y: i32) -> i32 {
     return result;
 }
 
-fn day1(contents: String) {
+fn get_nr_occupied_part2(map: &Map, x: i32, y: i32) -> i32 {
+    let mut result = 0;
+
+    let dirs_x = vec![1, -1, 0,  0, 1,  1, -1, -1];
+    let dirs_y = vec![0,  0, 1, -1, 1, -1,  1, -1];
+
+    for i in 0..dirs_x.len(){
+        let mut xi = x;
+        let mut yi = y;
+        loop{
+            xi += dirs_x[i];
+            yi += dirs_y[i];
+
+            if xi < 0 || yi < 0 || xi >= map.size_x || yi >= map.size_y{
+                break;
+            }
+
+            if map.get(xi, yi) == '#'{
+                result += 1;
+                break;
+            }
+            else if map.get(xi, yi) == 'L'{
+                break;
+            }
+        }
+    }
+
+    return result;
+}
+
+fn simulate_seating(contents: String, occupancy_threshold: i32, occupancy_fn: &dyn Fn(&Map, i32, i32) -> i32) -> i32{
     let mut map_current = Map::new(contents);
     let mut map_next = map_current.clone();
 
@@ -69,14 +99,14 @@ fn day1(contents: String) {
         for y in 0..map_current.size_y{
             for x in 0..map_current.size_x{
                 if map_current.get(x, y) == 'L'{
-                    let n_occupied = get_nr_occupied_adjacent(&map_current, x, y);
+                    let n_occupied = occupancy_fn(&map_current, x, y);
                     if n_occupied == 0{
                         map_next.set(x, y, '#');
                     }
                 }
                 else if map_current.get(x, y) == '#'{
-                    let n_occupied = get_nr_occupied_adjacent(&map_current, x, y);
-                    if n_occupied >= 4 {
+                    let n_occupied = occupancy_fn(&map_current, x, y);
+                    if n_occupied >= occupancy_threshold {
                         map_next.set(x, y, 'L');
                     }
                 }
@@ -89,12 +119,21 @@ fn day1(contents: String) {
     }
 
     // Count the number of occupied seats
-    let n_occupied = map_current.state.iter().filter(|&&x| x == '#').count();
+    return map_current.state.iter().filter(|&&x| x == '#').count() as i32;
+}
+
+fn day1(contents: String) {
+    let occupancy_threshold = 4;
+    let occupancy_fn = &get_nr_occupied_part1;
+    let n_occupied = simulate_seating(contents, occupancy_threshold, occupancy_fn);
     println!("Number of occupied places after stabilize: {}", n_occupied);
 }
 
 fn day2(contents:String) {
-
+    let occupancy_threshold = 5;
+    let occupancy_fn = &get_nr_occupied_part2;
+    let n_occupied = simulate_seating(contents, occupancy_threshold, occupancy_fn);
+    println!("Number of occupied places after stabilize: {}", n_occupied);
 }
 
 fn main() {
