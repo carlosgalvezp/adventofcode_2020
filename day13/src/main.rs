@@ -28,7 +28,29 @@ fn day1(contents: String) {
 }
 
 fn day2(contents: String) {
+    let bus_frequencies_str = contents.lines().nth(1).unwrap().split(",");
 
+    let mut bus_frequencies = Vec::new();
+    let mut bus_indices = Vec::new();
+
+    for (i, bus_frequency) in bus_frequencies_str.enumerate() {
+        if bus_frequency != "x" {
+            bus_frequencies.push(bus_frequency.parse::<i64>().unwrap());
+            bus_indices.push(i as i64);
+        }
+    }
+
+    let mut result = bus_frequencies[0];
+    let mut period = bus_frequencies[0];
+
+    for i in 1..bus_frequencies.len(){
+        while ((result + bus_indices[i]) % bus_frequencies[i]) != 0{
+            result += period;
+        }
+        period *= bus_frequencies[i];
+    }
+
+    println!("Part 2 solution: {}", result);
 }
 
 fn main() {
