@@ -1,11 +1,11 @@
 use std::env;
 use std::collections::HashMap;
 
-fn day1(input: Vec<i32>){
+fn run(input: Vec<i32>, target_number: i32){
     let mut spoken_numbers = HashMap::new();
     let mut last_number = 0;
 
-    for turn in 0..2020{
+    for turn in 0..target_number{
         if (turn as usize) < input.len(){
             last_number = input[turn as usize];
             spoken_numbers.insert(last_number, vec![turn]);
@@ -30,11 +30,15 @@ fn day1(input: Vec<i32>){
         }
     }
 
-    println!("Part 1 solution: {}", last_number);
+    println!("Solution: {}", last_number);
+}
+
+fn day1(input: Vec<i32>){
+    run(input, 2020);
 }
 
 fn day2(input: Vec<i32>){
-
+    run(input, 30000000);
 }
 
 fn main() {
