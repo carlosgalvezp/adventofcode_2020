@@ -1,7 +1,9 @@
 use std::env;
+use std::collections::HashMap;
 use std::fs;
 use regex::Regex;
 
+#[derive(Clone)]
 struct FieldRange{
     min: i32,
     max: i32,
@@ -13,6 +15,7 @@ impl FieldRange{
     }
 }
 
+#[derive(Clone)]
 struct Field{
     name: String,
     ranges: Vec<FieldRange>,
@@ -95,7 +98,76 @@ fn day1(contents: String) {
 }
 
 fn day2(contents: String) {
+    let content_groups : Vec<&str> = contents.split("\n\n").collect();
 
+    let fields = get_fields(content_groups[0]);
+    let my_ticket = get_my_ticket(content_groups[1]);
+    let nearby_tickets = get_nearby_tickets(content_groups[2]);
+
+    // Keep only the valid tickets
+    let mut valid_tickets = Vec::new();
+
+    for ticket in &nearby_tickets{
+        let mut is_ticket_valid = true;
+        for value in ticket{
+            let mut is_value_valid = false;
+            for field in &fields{
+                if field.ranges[0].contains(*value) || field.ranges[1].contains(*value) {
+                    is_value_valid = true;
+                    break;
+                }
+            }
+
+            if !is_value_valid{
+                is_ticket_valid = false;
+                break;
+            }
+        }
+        if is_ticket_valid{
+            valid_tickets.push(ticket.clone());
+        }
+    }
+
+    // Find order
+    let mut fields_to_associate : Vec<Field> = fields.clone();
+    let mut associations : HashMap<String, i32> = HashMap::new();
+
+    while !fields_to_associate.is_empty() {
+        for (i, _) in valid_tickets[0].iter().enumerate(){
+            let mut fields_that_match = Vec::new();
+
+            for field in &fields_to_associate{
+                let mut all_tickets_match_field = true;
+                for ticket in &valid_tickets{
+                    if !field.ranges[0].contains(ticket[i]) && !field.ranges[1].contains(ticket[i]){
+                        all_tickets_match_field = false;
+                        break;
+                    }
+                }
+
+                if all_tickets_match_field {
+                    fields_that_match.push(field);
+                }
+            }
+
+            // If we have a unique match, store the association
+            if fields_that_match.len() == 1{
+                let field_name = fields_that_match.first().unwrap().name.clone();
+                associations.insert(field_name.clone(), i as i32);
+                fields_to_associate.remove(fields_to_associate.iter().position(|x| x.name == field_name).unwrap());
+            }
+        }
+    }
+
+    // Get Part 2 solution
+    let mut result: i64 = 1;
+    for (association, idx) in associations{
+        if association.contains("departure"){
+            result *= my_ticket[idx as usize] as i64;
+        }
+    }
+
+    println!("Part 2 solution: {}", result);
 }
 
 fn main() {
