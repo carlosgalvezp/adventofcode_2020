@@ -283,10 +283,6 @@ fn main() {
     let fname = &args[2];
     let contents = fs::read_to_string(fname).expect("Something went wrong reading the file");
 
-    // let contents = ".#.\n\
-    //                 ..#\n\
-    //                 ###\n".to_string();
-
     if option == 1 {
         day1(contents);
     } else if option == 2 {
