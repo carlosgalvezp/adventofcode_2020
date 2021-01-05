@@ -24,23 +24,6 @@ enum State{
     Inactive,
 }
 
-fn print_cells(cells: &HashMap<Position, State>, frontier_min: &Vec<i32>, frontier_max: &Vec<i32>){
-    for z in frontier_min[2]..frontier_max[2]{
-        println!("z = {}", z);
-        for y in frontier_min[0]..frontier_max[1]{
-            for x in frontier_min[0]..frontier_max[0]{
-                if cells[&Position{x, y, z}] == State::Active {
-                    print!("{}", "#");
-                }
-                else{
-                    print!("{}", ".");
-                }
-            }
-            print!("{}", "\n");
-        }
-    }
-}
-
 fn day1(contents: String) {
     let mut cells : HashMap<Position, State> = HashMap::new();
 
