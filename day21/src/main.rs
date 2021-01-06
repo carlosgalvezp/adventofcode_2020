@@ -117,7 +117,13 @@ fn day1(contents: String){
 }
 
 fn day2(contents: String){
+    let (_, _, mut allergens, allergen_to_ingredient_map) = parse_input(contents);
+    allergens.sort();
 
+    println!("Part 2 solution:");
+    for allergen in allergens{
+        print!("{},", allergen_to_ingredient_map[&allergen]);
+    }
 }
 
 fn main() {
