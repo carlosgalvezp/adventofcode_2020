@@ -7,6 +7,7 @@ enum Color{
     Black,
 }
 
+#[derive(Clone)]
 struct Map{
     size: i32,
     data: Vec<Color>,
@@ -31,9 +32,19 @@ impl Map{
     fn at_mut(&mut self, x: i32, y: i32) -> &mut Color{
         return &mut self.data[idx(x, y, self.size)];
     }
+
+    fn at_grid(&self, x: i32, y: i32) -> &Color{
+        let idx = y * self.size + x;
+        return &self.data[idx as usize];
+    }
+
+    fn at_grid_mut(&mut self, x: i32, y: i32) -> &mut Color{
+        let idx = y * self.size + x;
+        return &mut self.data[idx as usize];
+    }
 }
 
-fn day1(contents: String){
+fn get_map(contents: String) -> Map{
     let map_size = 4 * contents.lines().count() as i32;
     let mut map = Map::new(map_size);
 
@@ -88,11 +99,77 @@ fn day1(contents: String){
         };
     }
 
+    return map;
+}
+
+fn get_n_black_neighbors(map: &Map, x: i32, y: i32) -> i32{
+    let diffs = vec![
+        vec![ 2,  0],  // East
+        vec![-2,  0],  // West
+        vec![ 1,  1],  // North-east
+        vec![ 1, -1],  // South-east
+        vec![-1,  1],  // North-west
+        vec![-1, -1],  // South-west
+    ];
+
+    let mut n_black = 0;
+
+    for diff in diffs{
+        let px = x + diff[0];
+        let py = y + diff[1];
+
+        if (px >= 0) && (px < map.size) && (py >= 0) && (py < map.size){
+            if *map.at_grid(px, py) == Color::Black{
+                n_black += 1;
+            }
+        }
+    }
+
+    return n_black;
+}
+
+fn day1(contents: String){
+    let map = get_map(contents);
     let n_black = map.data.iter().filter(|&&x| x == Color::Black).count();
     println!("Part 1 solution: {}", n_black);
 }
 
 fn day2(contents: String){
+    let mut map = get_map(contents);
+    let mut next_map = map.clone();
+
+    let n_days = 100;
+    for d in 0..n_days{
+        let mut x_begin = 1;
+
+        for y in 0..map.size{
+            x_begin = 1 - x_begin;
+            for x in (x_begin..map.size).step_by(2){
+                let n_black = get_n_black_neighbors(&map, x, y);
+
+                match map.at_grid(x, y){
+                    Color::Black => {
+                        if (n_black == 0) || (n_black > 2) {
+                            *next_map.at_grid_mut(x, y) = Color::White;
+                        }
+                    },
+                    Color::White => {
+                        if n_black == 2{
+                            *next_map.at_grid_mut(x, y) = Color::Black;
+                        }
+                    },
+                }
+            }
+        }
+
+        map = next_map.clone();
+
+        let n_black_day = map.data.iter().filter(|&&x| x == Color::Black).count();
+        println!("Day {}: {}", d + 1, n_black_day);
+    }
+
+    let n_black = map.data.iter().filter(|&&x| x == Color::Black).count();
+    println!("Part 2 solution: {}", n_black);
 }
 
 fn main() {
