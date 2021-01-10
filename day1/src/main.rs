@@ -1,26 +1,30 @@
-use std::io::{self, BufRead};
+use std::env;
+use std::fs;
 
-fn main() {
-    // Read input
-    let mut numbers: Vec<i32> = Vec::new();
+fn day1(contents: String){
+    let numbers : Vec<i32> = contents.lines().map(|x| x.parse::<i32>().unwrap()).collect();
 
-    for line in io::stdin().lock().lines() {
-        let num: i32 = line
-            .expect("Failed to read line")
-            .parse()
-            .expect("Failed to parse line into number");
-        numbers.push(num);
+    for i in 0..numbers.len() - 1 {
+        for j in i + 1..numbers.len() {
+            if numbers[i] + numbers[j] == 2020 {
+                println!(
+                    "Found numbers: {} and {}. Product: {}",
+                    numbers[i],
+                    numbers[j],
+                    numbers[i] * numbers[j]
+                );
+                return
+            }
+        }
     }
+}
 
-    // Compute output
-    let mut found = false;
+fn day2(contents: String){
+    let numbers : Vec<i32> = contents.lines().map(|x| x.parse::<i32>().unwrap()).collect();
 
-    let mut i = 0;
-    while i < numbers.len() - 2 {
-        let mut j = i + 1;
-        while j < numbers.len() - 1 {
-            let mut k = j + 1;
-            while k < numbers.len() {
+    for i in 0..numbers.len() - 2 {
+        for j in i + 1..numbers.len() - 1 {
+            for k in j + 1..numbers.len() {
                 if numbers[i] + numbers[j] + numbers[k] == 2020 {
                     println!(
                         "Found numbers: {}, {} and {}. Product: {}",
@@ -29,20 +33,24 @@ fn main() {
                         numbers[k],
                         numbers[i] * numbers[j] * numbers[k]
                     );
-                    found = true;
-                    break;
+                    return
                 }
-                k = k + 1;
-            }
-            j = j + 1;
-            if found {
-                break;
             }
         }
+    }
+}
 
-        i = i + 1;
-        if found {
-            break;
-        }
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let option: i32 = args[1].parse().unwrap();
+    let fname = &args[2];
+    let contents = fs::read_to_string(fname).expect("Something went wrong reading the file");
+
+    if option == 1 {
+        day1(contents);
+    } else if option == 2 {
+        day2(contents);
+    } else {
+        panic!("Wrong option!");
     }
 }
